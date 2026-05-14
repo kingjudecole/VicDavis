@@ -297,15 +297,17 @@ ul { list-style: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.45;
-  z-index: 0;
+  opacity: 0.55;
+  /* FIX 1: Negative z-index ensures video sits below overlay and all content */
+  z-index: -2;
 }
 .h-overlay {
   position: absolute;
   inset: 0;
+  /* Dark overlay sits above the video but below all content */
   background: rgba(0,0,0,0.6);
   pointer-events: none;
-  z-index: 1;
+  z-index: -1;
 }
 .h-lines {
   position: absolute;
@@ -315,7 +317,8 @@ ul { list-style: none; }
     linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
   background-size: 72px 72px;
   pointer-events: none;
-  z-index: 1;
+  /* Lines grid sits above overlay but below content */
+  z-index: 0;
 }
 /* Vertical social rail — AlbaCars style */
 .h-social-rail {
@@ -712,6 +715,11 @@ ul { list-style: none; }
   text-align: center;
   position: relative;
   overflow: hidden;
+  /* FIX 2: flex column ensures icon sits directly above number */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .metric-card:first-child { border-radius: var(--r3) 0 0 var(--r3); }
 .metric-card:last-child { border-radius: 0 var(--r3) var(--r3) 0; }
@@ -743,18 +751,28 @@ ul { list-style: none; }
   text-transform: uppercase;
   letter-spacing: 2px;
 }
+/* FIX 2: Metallic gold gradient applied to icon container */
 .metric-icon {
-  width: 48px;
-  height: 48px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.08);
+  width: 52px;
+  height: 52px;
+  /* Premium metallic gold gradient */
+  background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 30%, #b38728 60%, #fbf5b7 80%, #aa771c 100%);
+  border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Stacked directly above the number */
   margin: 0 auto 20px;
+  box-shadow: 0 4px 16px rgba(191,149,63,.35), inset 0 1px 0 rgba(255,255,255,.45);
 }
-.metric-icon svg { width: 22px; height: 22px; fill: rgba(255,255,255,.4); }
+.metric-icon svg {
+  width: 22px;
+  height: 22px;
+  /* White fill for maximum contrast against gold background */
+  fill: rgba(255,255,255,.92);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.25));
+}
 
 /* ============================
    IMPORT DARK SECTION
@@ -1841,7 +1859,7 @@ footer { background: #020d1c; color: #fff; }
   <div class="ni">
     <a href="#" class="n-logo">
       <div class="logo-svg-wrap">
-        <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis Auto Link" style="height:54px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3));" />
+        <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis Auto Link" style="height:54px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3));" decoding="async" />
       </div>
     </a>
 
@@ -1888,7 +1906,9 @@ footer { background: #020d1c; color: #fff; }
 
 <!-- ======== HERO ======== -->
 <section id="hero">
+  <!-- FIX 1: autoplay muted loop playsinline required for cross-browser autoplay; three source fallbacks cover all filename variants -->
   <video class="hero-video" id="hero-vid" autoplay muted loop playsinline preload="auto">
+    <source src="assets/videos/hero video.mp4" type="video/mp4">
     <source src="assets/videos/hero_video.mp4" type="video/mp4">
     <source src="assets/videos/herovideo.mp4" type="video/mp4">
   </video>
@@ -2369,7 +2389,7 @@ footer { background: #020d1c; color: #fff; }
 <div id="vd-flyer">
   <div class="flyer-card">
     <button class="flyer-close" onclick="document.getElementById('vd-flyer').classList.remove('show');setTimeout(()=>document.getElementById('vd-flyer').style.display='none',300)">×</button>
-    <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis" style="width:90px;display:block;margin:0 auto 10px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))">
+    <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis" style="width:90px;display:block;margin:0 auto 10px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))" loading="lazy" decoding="async">
     <p style="color:#fff;font-family:'Oswald',sans-serif;font-size:13px;text-align:center;text-transform:uppercase;letter-spacing:1.2px;margin:0 0 4px;line-height:1.2">Spend Less.<br>Drive More.</p>
     <p style="color:rgba(255,255,255,.55);font-size:10px;text-align:center;margin:0 0 14px;line-height:1.55">USA imports direct to Ghana.<br>Official Copart &amp; IAAI Partner.</p>
     <div style="display:flex;gap:7px">
@@ -2573,10 +2593,10 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="ptners" style="align-items:center">
           <a href="https://www.copart.com" target="_blank" class="pt pt-copart" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;padding:8px 14px">
-            <img src="assets/images/Copart_logo_svg.png" alt="Copart" style="height:20px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
+            <img src="assets/images/Copart_logo.svg.png" alt="Copart" width="80" height="20" loading="lazy" decoding="async" style="height:20px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
           </a>
           <a href="https://www.iaai.com" target="_blank" class="pt pt-iaai" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;padding:8px 14px">
-            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" style="height:20px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
+            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" width="80" height="20" loading="lazy" decoding="async" style="height:20px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
           </a>
           <span style="font-size:12px;color:rgba(255,255,255,.35);font-weight:500">Official Licensed Partners</span>
         </div>
@@ -2615,24 +2635,27 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Visual explainer banner -->
         <div class="visual-trio fd2">
           <div class="visual-trio-item">
-            <img src="assets/images/usabidding.jpg" alt="USA Auction Live Bidding" loading="lazy">
-            <div class="visual-trio-caption">🏛️ USA Auction Live Bidding</div>
+            <img src="assets/images/usabidding.jpg" alt="USA Auction Live Bidding" loading="lazy" decoding="async">
+            <div class="visual-trio-caption">USA Auction Live Bidding</div>
           </div>
           <div class="visual-trio-item">
-            <img src="assets/images/loogistics.jpg" alt="Shipping & Logistics" loading="lazy">
-            <div class="visual-trio-caption">🚢 Shipping &amp; Logistics</div>
+            <img src="assets/images/loogistics.jpg" alt="Shipping & Logistics" loading="lazy" decoding="async">
+            <div class="visual-trio-caption">Shipping &amp; Logistics</div>
           </div>
           <div class="visual-trio-item">
-            <img src="assets/images/shippedtoyourdoor.jpg" alt="Delivered to Your Door" loading="lazy">
-            <div class="visual-trio-caption">🚗 Delivered to Your Door</div>
+            <img src="assets/images/shippedtoyourdoor.jpg" alt="Delivered to Your Door" loading="lazy" decoding="async">
+            <div class="visual-trio-caption">Delivered to Your Door</div>
           </div>
         </div>
-        <div style="margin-top:22px">
-          <a href="https://wa.me/233577551078?text=Hello%20VicDavis%20Auto%20Link!%20I%27m%20interested%20in%20importing%20a%20car%20from%20USA%20via%20Copart%2FIAAI.%20Can%20you%20help%20me%3F" target="_blank" class="btn btn-r btn-full" style="margin-bottom:10px">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.978-1.413A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
-            Start Import via WhatsApp
+        <!-- FIX 3: CTA buttons removed; official partner logos displayed instead -->
+        <div style="margin-top:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <span style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35)">Official Licensed Partners</span>
+          <a href="https://www.copart.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:10px 16px;transition:background .25s" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+            <img src="assets/images/Copart_logo.svg.png" alt="Copart — Official Partner" width="90" height="22" loading="lazy" decoding="async" style="height:22px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
           </a>
-          <button class="btn btn-ow btn-full" onclick="openBook('Import Consultation')">Book Import Consultation</button>
+          <a href="https://www.iaai.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:10px 16px;transition:background .25s" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAAI — Official Partner" width="80" height="22" loading="lazy" decoding="async" style="height:22px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
+          </a>
         </div>
       </div>
     </div>
@@ -2699,7 +2722,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- Verified IG Header -->
   <div class="ig-header">
     <div class="ig-avatar">
-      <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis">
+      <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis" loading="lazy" decoding="async">
     </div>
     <div class="ig-meta">
       <div class="ig-username">
@@ -2717,28 +2740,28 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="ig-grid">
     <!-- Row 1 -->
     <div class="ig-item fu">
-      <img src="assets/images/gallery1.jpg" alt="VicDavis Fleet" loading="lazy">
+      <img src="assets/images/gallery1.jpg" alt="VicDavis Fleet" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.2K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>48</div>
       </div>
     </div>
     <div class="ig-item fu fd1">
-      <img src="assets/images/gallery2.jpg" alt="Car Delivery" loading="lazy">
+      <img src="assets/images/gallery2.jpg" alt="Car Delivery" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>874</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>31</div>
       </div>
     </div>
     <div class="ig-item fu fd2">
-      <img src="assets/images/pexels-siddant-kanthi-1648343429-29827767.jpg" alt="Shipping" loading="lazy">
+      <img src="assets/images/pexels-siddant-kanthi-1648343429-29827767.jpg" alt="Shipping" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>2.1K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>92</div>
       </div>
     </div>
     <div class="ig-item fu fd3">
-      <img src="assets/images/pexels-pixabay-164634.jpg" alt="Luxury Cars" loading="lazy">
+      <img src="assets/images/pexels-pixabay-164634.jpg" alt="Luxury Cars" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.8K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>65</div>
@@ -2746,28 +2769,28 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <!-- Row 2 -->
     <div class="ig-item fu">
-      <img src="assets/images/gallery4.jpg" alt="VicDavis Cars" loading="lazy">
+      <img src="assets/images/gallery4.jpg" alt="VicDavis Cars" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>956</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>27</div>
       </div>
     </div>
     <div class="ig-item fu fd1">
-      <img src="assets/images/shippedtoyourdoor.jpg" alt="Delivered" loading="lazy">
+      <img src="assets/images/shippedtoyourdoor.jpg" alt="Delivered" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.4K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>53</div>
       </div>
     </div>
     <div class="ig-item fu fd2">
-      <img src="assets/images/usabidding.jpg" alt="USA Auction" loading="lazy">
+      <img src="assets/images/usabidding.jpg" alt="USA Auction" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>3.2K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>118</div>
       </div>
     </div>
     <div class="ig-item fu fd3">
-      <img src="assets/images/loogistics.jpg" alt="Logistics" loading="lazy">
+      <img src="assets/images/loogistics.jpg" alt="Logistics" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>2.7K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>84</div>
@@ -2775,28 +2798,28 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <!-- Row 3 -->
     <div class="ig-item fu">
-      <img src="assets/images/gallery1.jpg" alt="Fleet" loading="lazy" style="object-position:center 30%">
+      <img src="assets/images/gallery1.jpg" alt="Fleet" loading="lazy" style="object-position:center 30%" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>998</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>42</div>
       </div>
     </div>
     <div class="ig-item fu fd1">
-      <img src="assets/images/gallery2.jpg" alt="Cars" loading="lazy" style="object-position:center 70%">
+      <img src="assets/images/gallery2.jpg" alt="Cars" loading="lazy" style="object-position:center 70%" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.1K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>36</div>
       </div>
     </div>
     <div class="ig-item fu fd2">
-      <img src="assets/images/pexels-siddant-kanthi-1648343429-29827767.jpg" alt="Import" loading="lazy" style="object-position:right center">
+      <img src="assets/images/pexels-siddant-kanthi-1648343429-29827767.jpg" alt="Import" loading="lazy" style="object-position:right center" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.6K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>71</div>
       </div>
     </div>
     <div class="ig-item fu fd3">
-      <img src="assets/images/gallery4.jpg" alt="VicDavis" loading="lazy" style="object-position:left center">
+      <img src="assets/images/gallery4.jpg" alt="VicDavis" loading="lazy" style="object-position:left center" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>745</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>19</div>
@@ -3130,7 +3153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="container">
       <div class="fg4">
         <div class="fbrand">
-          <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis Auto Link" style="height:70px;width:auto;object-fit:contain;margin-bottom:12px;" />
+          <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis Auto Link" style="height:70px;width:auto;object-fit:contain;margin-bottom:12px;" loading="lazy" decoding="async" />
           <div class="fbrand-name" style="display:none">VicDavis <em>Auto Link</em></div>
           <p>Your Ultimate Auto For Your Luxury and Comfort. Ghana's most trusted car dealership and USA importer since 2009. Official Copart &amp; IAAI Partner. Opposite Dansoman Police Station, Accra.</p>
           <div class="fsoc">
@@ -3148,11 +3171,12 @@ document.addEventListener('DOMContentLoaded', function() {
             </a>
           </div>
           <div class="fpartners" style="margin-top:16px;align-items:center;gap:12px">
+            <!-- FIX 5: Using correct asset filenames with proper sizing attributes -->
             <a href="https://www.copart.com" target="_blank" style="display:flex;align-items:center;background:#fff;border-radius:6px;padding:4px 10px;border:1px solid rgba(255,255,255,.1);transition:opacity .2s" title="Copart Partner">
-              <img src="assets/images/Copart_logo_svg.png" alt="Copart" style="height:26px;width:auto;object-fit:contain;filter:grayscale(1) brightness(0) invert(0);display:block">
+              <img src="assets/images/Copart_logo.svg.png" alt="Copart" width="80" height="26" style="height:26px;width:auto;object-fit:contain;display:block" loading="lazy" decoding="async">
             </a>
             <a href="https://www.iaai.com" target="_blank" style="display:flex;align-items:center;background:#fff;border-radius:6px;padding:4px 10px;border:1px solid rgba(255,255,255,.1);transition:opacity .2s" title="IAAI Partner">
-              <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" style="height:26px;width:auto;object-fit:contain;filter:grayscale(1) brightness(0) invert(0);display:block">
+              <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" width="80" height="26" style="height:26px;width:auto;object-fit:contain;display:block" loading="lazy" decoding="async">
             </a>
           </div>
         </div>
@@ -3205,11 +3229,12 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="fb">
       <p>© <span id="fyr"></span> VicDavis Auto Link. All rights reserved. Accra, Ghana.</p>
       <div class="fpbs" style="display:flex;align-items:center;gap:14px">
+        <!-- FIX 5: Correct asset filenames with width/height to prevent layout shift -->
         <a href="https://www.copart.com" target="_blank" title="Copart Partner" style="opacity:.6;transition:opacity .2s;display:block">
-          <img src="assets/images/Copart_logo_svg.png" alt="Copart" style="height:22px;width:auto;object-fit:contain;filter:invert(1) brightness(1);display:block">
+          <img src="assets/images/Copart_logo.svg.png" alt="Copart" width="72" height="22" style="height:22px;width:auto;object-fit:contain;filter:invert(1) brightness(1);display:block" loading="lazy" decoding="async">
         </a>
         <a href="https://www.iaai.com" target="_blank" title="IAAI Partner" style="opacity:.6;transition:opacity .2s;display:block">
-          <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" style="height:22px;width:auto;object-fit:contain;filter:invert(1) brightness(1);display:block">
+          <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" width="72" height="22" style="height:22px;width:auto;object-fit:contain;filter:invert(1) brightness(1);display:block" loading="lazy" decoding="async">
         </a>
       </div>
     </div>
@@ -3237,7 +3262,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <svg viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="rate-box-logo">
-      <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis Auto Link" style="height:50px;width:auto;object-fit:contain;" />
+      <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis Auto Link" style="height:50px;width:auto;object-fit:contain;" loading="lazy" decoding="async" />
     </div>
     <div id="rateContent">
       <h3>Get the Best Deal.<br>Leave a Quick Rating.</h3>
@@ -3813,9 +3838,9 @@ function submitRating() {
   document.getElementById('rateSuccess').style.display = 'block';
   try { localStorage.setItem('vd_rated', '1'); } catch(e) {}
 }
-// Auto-show rating popup after 45 seconds, only if not already rated
+// FIX 6: Show rating popup after 45 seconds on EVERY page load.
+// localStorage/sessionStorage checks removed — popup is no longer suppressed after first visit.
 setTimeout(() => {
-  try { if (localStorage.getItem('vd_rated')) return; } catch(e) {}
   openRating();
 }, 45000);
 
