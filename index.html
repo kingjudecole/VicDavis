@@ -1873,14 +1873,14 @@ footer { background: #020d1c; color: #fff; }
 }
 #vd-preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-/* Ambient background glow */
+/* Ambient background glow — brand navy, not red */
 #vd-preloader::before {
   content: '';
   position: absolute;
-  width: 600px;
-  height: 600px;
+  width: 700px;
+  height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(211,47,47,.14) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0,51,102,.35) 0%, rgba(0,30,63,.15) 50%, transparent 70%);
   top: 50%; left: 50%;
   transform: translate(-50%,-50%);
   animation: plGlow 3s ease-in-out infinite alternate;
@@ -1911,7 +1911,7 @@ footer { background: #020d1c; color: #fff; }
 }
 .pl-tagline.show { opacity: 1; transform: translateY(0); color: rgba(255,255,255,.72); }
 
-/* Logo */
+/* Logo — NO filter, NO tint. Display natural VicDavis colors. */
 .pl-logo {
   opacity: 0;
   transform: scale(.88);
@@ -1921,19 +1921,27 @@ footer { background: #020d1c; color: #fff; }
   margin-bottom: 52px;
 }
 .pl-logo.show { opacity: 1; transform: scale(1); }
-.pl-logo img { height: 100px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 24px rgba(211,47,47,.4)); display: block; }
+.pl-logo img {
+  height: 120px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  /* LOGO FIX: NO filter/mix-blend-mode. The VicDavis logo has its own colors.
+     A navy drop-shadow only — no color distortion. */
+  filter: drop-shadow(0 6px 28px rgba(0,31,63,.55));
+}
 
-/* Divider */
+/* Divider — brand gold accent */
 .pl-divider {
   width: 0px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(211,47,47,.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(245,158,11,.6), rgba(0,80,160,.5), transparent);
   margin: 0 0 40px;
   transition: width .8s ease;
   position: relative;
   z-index: 1;
 }
-.pl-divider.show { width: 200px; }
+.pl-divider.show { width: 260px; }
 
 /* Partnership */
 .pl-partnership {
@@ -1943,48 +1951,61 @@ footer { background: #020d1c; color: #fff; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 22px;
   position: relative;
   z-index: 1;
 }
 .pl-partnership.show { opacity: 1; transform: translateY(0); }
 .pl-partnership-label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 3.5px;
   text-transform: uppercase;
-  color: rgba(255,255,255,.3);
+  color: rgba(255,255,255,.38);
 }
 .pl-partner-logos {
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
 }
+/* PARTNER LOGO FIX: White pill container so natural logo colors show clearly.
+   NO brightness(0) invert(1) — that made them white blobs. */
 .pl-partner-pill {
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px;
-  padding: 12px 22px;
+  justify-content: center;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 28px;
+  min-width: 160px;
+  min-height: 72px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
 }
 .pl-partner-pill img {
-  height: 26px;
+  height: 44px;
   width: auto;
+  max-width: 140px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
   display: block;
-  opacity: .85;
+  /* No filter — show real logo colors on white background */
 }
 
-/* Progress bar */
+/* Progress bar — brand navy-to-gold */
 .pl-progress {
   position: absolute;
   bottom: 0; left: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #D32F2F, #ff6b6b, #D32F2F);
+  height: 3px;
+  background: linear-gradient(90deg, #001F3F, #003580, #F59E0B, #003580, #001F3F);
+  background-size: 300% 100%;
   width: 0%;
   transition: width linear;
+  animation: plBarShimmer 2s linear infinite;
+}
+@keyframes plBarShimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
 }
 </style>
 
@@ -1999,10 +2020,12 @@ footer { background: #020d1c; color: #fff; }
     <span class="pl-partnership-label">In Partnership With</span>
     <div class="pl-partner-logos">
       <div class="pl-partner-pill">
-        <img src="assets/images/Copart_logo.svg.png" alt="Copart" style="height:28px">
+        <!-- Copart: natural colors on white pill — no filter -->
+        <img src="assets/images/Copart_logo.svg.png" alt="Copart Official Partner">
       </div>
       <div class="pl-partner-pill">
-        <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" style="height:22px">
+        <!-- IAA: natural colors on white pill — no filter -->
+        <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA Official Partner">
       </div>
     </div>
   </div>
@@ -2010,10 +2033,11 @@ footer { background: #020d1c; color: #fff; }
 
 <script>
 /* ── Premium Preloader Sequence ──
-   Step 1 (0ms)   : tagline fades in
-   Step 2 (900ms) : logo bounces in
-   Step 3 (1600ms): divider grows, partnership fades in
-   Step 4 (3600ms): full fade-out revealing the site
+   Step 1 (80ms)   : tagline fades in
+   Step 2 (900ms)  : logo bounces in
+   Step 3 (1700ms) : divider grows, partnership fades in
+   Step 4 (3600ms) : preloader begins fade-out (700ms transition)
+   Step 5 (4300ms) : typeWriter() fires — hero is now visible, animation makes sense
 */
 (function() {
   var pl       = document.getElementById('vd-preloader');
@@ -2040,17 +2064,29 @@ footer { background: #020d1c; color: #fff; }
     partners.classList.add('show');
   }, 1700);
 
-  /* Step 4: Fade out */
+  /* Step 4: Begin fade-out */
   setTimeout(function() {
     pl.classList.add('hidden');
-    /* Remove from DOM after transition completes */
-    setTimeout(function() { if (pl && pl.parentNode) { pl.parentNode.removeChild(pl); } }, 800);
+    /* Step 5: After fade-out transition (700ms) finishes:
+       — Remove preloader from DOM
+       — NOW start typewriter so user sees it animate fresh */
+    setTimeout(function() {
+      if (pl && pl.parentNode) { pl.parentNode.removeChild(pl); }
+      if (typeof typeWriter === 'function') { typeWriter(); }
+    }, 750); /* matches the 0.7s opacity transition + 50ms buffer */
   }, totalDur);
 
-  /* Safety net: if page load is slow, don't block content forever */
+  /* Safety net: if page takes too long, don't block content.
+     Also fires typeWriter as fallback so it always runs. */
   document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
-      if (pl && !pl.classList.contains('hidden')) { pl.classList.add('hidden'); }
+      if (pl && !pl.classList.contains('hidden')) {
+        pl.classList.add('hidden');
+        setTimeout(function() {
+          if (pl && pl.parentNode) { pl.parentNode.removeChild(pl); }
+          if (typeof typeWriter === 'function') { typeWriter(); }
+        }, 750);
+      }
     }, 5000);
   });
 })();
@@ -3195,11 +3231,17 @@ footer { background: #020d1c; color: #fff; }
       </div>
       <div class="fu fd2">
         <div class="vid-frame">
-          <div class="vid-ph">
-            <button class="vid-btn" onclick="alert('Upload your company video to YouTube and replace this with your embed link.')">
-              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </button>
-            <p>Watch Our Story — VicDavis Auto Link</p>
+          <!-- YouTube embed: https://youtu.be/31-00yeB96U -->
+          <div style="position:relative;width:100%;padding-bottom:56.25%;border-radius:var(--r3);overflow:hidden;box-shadow:var(--sh5)">
+            <iframe
+              src="https://www.youtube.com/embed/31-00yeB96U?rel=0&modestbranding=1&color=white"
+              title="VicDavis Auto Link — Our Story"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+              style="position:absolute;top:0;left:0;width:100%;height:100%;border:none"
+            ></iframe>
           </div>
         </div>
         <div class="copart-badge">
@@ -4089,7 +4131,9 @@ document.addEventListener('DOMContentLoaded', () => {
   renderFAQs();
   calcR();
   checkOpen();
-  typeWriter();
+  /* typeWriter() intentionally NOT called here.
+     It is called by the preloader after fade-out completes (see preloader script).
+     This prevents the animation finishing before the user sees the hero. */
   initAnim();
   startCountdowns();
 });
