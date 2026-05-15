@@ -293,21 +293,23 @@ ul { list-style: none; }
 }
 .hero-video {
   position: absolute;
-  inset: 0;
+  top: 0; left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   opacity: 0.55;
-  /* FIX 1: Negative z-index ensures video sits below overlay and all content */
-  z-index: -2;
+  /* VIDEO FIX: z-index 0 (NOT negative) so video renders ABOVE #hero's background colour.
+     A negative z-index child is painted behind the parent's background — that was the bug. */
+  z-index: 0;
+  will-change: transform; /* GPU acceleration for smooth playback */
 }
 .h-overlay {
   position: absolute;
   inset: 0;
-  /* Dark overlay sits above the video but below all content */
-  background: rgba(0,0,0,0.6);
+  /* Dark overlay sits above video, below content */
+  background: linear-gradient(135deg, rgba(0,10,30,0.72) 0%, rgba(0,5,15,0.58) 100%);
   pointer-events: none;
-  z-index: -1;
+  z-index: 1;
 }
 .h-lines {
   position: absolute;
@@ -317,8 +319,7 @@ ul { list-style: none; }
     linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
   background-size: 72px 72px;
   pointer-events: none;
-  /* Lines grid sits above overlay but below content */
-  z-index: 0;
+  z-index: 2;
 }
 /* Vertical social rail — AlbaCars style */
 .h-social-rail {
@@ -357,7 +358,7 @@ ul { list-style: none; }
 
 .hc {
   position: relative;
-  z-index: 2;
+  z-index: 3; /* Above video(0) + overlay(1) + lines(2) */
   padding: 130px 32px 72px;
   max-width: 1360px;
   margin: 0 auto;
@@ -1575,7 +1576,7 @@ footer { background: #020d1c; color: #fff; }
 .ig-follow-btn:hover { opacity: .85; }
 .ig-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr); /* 3 columns = 2 rows × 3 = 6 images */
   gap: 3px;
   max-width: 1240px;
   margin: 0 auto;
@@ -1851,6 +1852,210 @@ footer { background: #020d1c; color: #fff; }
 </head>
 <body>
 
+<!-- ======================================================
+     PREMIUM PRELOADER
+     Sequence: Tagline → Logo → Partnership logos → Fade out
+     ====================================================== -->
+<style>
+/* ── Preloader ── */
+#vd-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #000c1e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  transition: opacity .7s ease, visibility .7s ease;
+  overflow: hidden;
+}
+#vd-preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* Ambient background glow */
+#vd-preloader::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(211,47,47,.14) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  animation: plGlow 3s ease-in-out infinite alternate;
+}
+@keyframes plGlow {
+  0% { transform: translate(-50%,-50%) scale(.85); opacity: .6; }
+  100% { transform: translate(-50%,-50%) scale(1.15); opacity: 1; }
+}
+
+/* Tagline */
+.pl-tagline {
+  font-family: 'Oswald', Georgia, serif;
+  font-size: clamp(14px, 2.2vw, 20px);
+  font-weight: 300;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.0);
+  text-align: center;
+  max-width: 600px;
+  padding: 0 24px;
+  line-height: 1.7;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .9s ease, transform .9s ease, color .9s ease;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 42px;
+}
+.pl-tagline.show { opacity: 1; transform: translateY(0); color: rgba(255,255,255,.72); }
+
+/* Logo */
+.pl-logo {
+  opacity: 0;
+  transform: scale(.88);
+  transition: opacity .8s ease, transform .8s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+  z-index: 1;
+  margin-bottom: 52px;
+}
+.pl-logo.show { opacity: 1; transform: scale(1); }
+.pl-logo img { height: 100px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 24px rgba(211,47,47,.4)); display: block; }
+
+/* Divider */
+.pl-divider {
+  width: 0px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(211,47,47,.5), transparent);
+  margin: 0 0 40px;
+  transition: width .8s ease;
+  position: relative;
+  z-index: 1;
+}
+.pl-divider.show { width: 200px; }
+
+/* Partnership */
+.pl-partnership {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .7s ease, transform .7s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+  z-index: 1;
+}
+.pl-partnership.show { opacity: 1; transform: translateY(0); }
+.pl-partnership-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+}
+.pl-partner-logos {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.pl-partner-pill {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  padding: 12px 22px;
+}
+.pl-partner-pill img {
+  height: 26px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  display: block;
+  opacity: .85;
+}
+
+/* Progress bar */
+.pl-progress {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #D32F2F, #ff6b6b, #D32F2F);
+  width: 0%;
+  transition: width linear;
+}
+</style>
+
+<div id="vd-preloader">
+  <div class="pl-progress" id="pl-progress"></div>
+  <p class="pl-tagline" id="pl-tagline">Your Ultimate Auto<br>For Your Luxury and Comfort</p>
+  <div class="pl-logo" id="pl-logo">
+    <img src="assets/images/IMG_20260513_010215_065-removebg-preview.png" alt="VicDavis Auto Link">
+  </div>
+  <div class="pl-divider" id="pl-divider"></div>
+  <div class="pl-partnership" id="pl-partnership">
+    <span class="pl-partnership-label">In Partnership With</span>
+    <div class="pl-partner-logos">
+      <div class="pl-partner-pill">
+        <img src="assets/images/Copart_logo.svg.png" alt="Copart" style="height:28px">
+      </div>
+      <div class="pl-partner-pill">
+        <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" style="height:22px">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Premium Preloader Sequence ──
+   Step 1 (0ms)   : tagline fades in
+   Step 2 (900ms) : logo bounces in
+   Step 3 (1600ms): divider grows, partnership fades in
+   Step 4 (3600ms): full fade-out revealing the site
+*/
+(function() {
+  var pl       = document.getElementById('vd-preloader');
+  var progress = document.getElementById('pl-progress');
+  var tagline  = document.getElementById('pl-tagline');
+  var logo     = document.getElementById('pl-logo');
+  var divider  = document.getElementById('pl-divider');
+  var partners = document.getElementById('pl-partnership');
+
+  /* Animate progress bar over total duration */
+  var totalDur = 3600;
+  progress.style.transition = 'width ' + totalDur + 'ms linear';
+  requestAnimationFrame(function() { requestAnimationFrame(function() { progress.style.width = '100%'; }); });
+
+  /* Step 1: Tagline */
+  setTimeout(function() { tagline.classList.add('show'); }, 80);
+
+  /* Step 2: Logo */
+  setTimeout(function() { logo.classList.add('show'); }, 900);
+
+  /* Step 3: Divider + Partnership */
+  setTimeout(function() {
+    divider.classList.add('show');
+    partners.classList.add('show');
+  }, 1700);
+
+  /* Step 4: Fade out */
+  setTimeout(function() {
+    pl.classList.add('hidden');
+    /* Remove from DOM after transition completes */
+    setTimeout(function() { if (pl && pl.parentNode) { pl.parentNode.removeChild(pl); } }, 800);
+  }, totalDur);
+
+  /* Safety net: if page load is slow, don't block content forever */
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      if (pl && !pl.classList.contains('hidden')) { pl.classList.add('hidden'); }
+    }, 5000);
+  });
+})();
+</script>
+
 <!-- PAGE TRANSITION OVERLAY -->
 <div class="pg-transition" id="pgt"></div>
 
@@ -1906,8 +2111,24 @@ footer { background: #020d1c; color: #fff; }
 
 <!-- ======== HERO ======== -->
 <section id="hero">
-  <!-- FIX 1: autoplay muted loop playsinline required for cross-browser autoplay; three source fallbacks cover all filename variants -->
-  <video class="hero-video" id="hero-vid" autoplay muted loop playsinline preload="auto">
+  <!--
+    VIDEO FIX NOTES:
+    1. z-index is now 0 (positive) — it was -2 which hid it behind #hero background
+    2. poster shows logo while video loads (covers flash of white)
+    3. Three filename variants cover spaces/underscores in the repo filename
+    4. preload="auto" starts buffering immediately
+    5. playsinline required for iOS Safari
+  -->
+  <video
+    class="hero-video"
+    id="hero-vid"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    poster="assets/images/IMG_20260513_010215_065-removebg-preview.png"
+  >
     <source src="assets/videos/hero video.mp4" type="video/mp4">
     <source src="assets/videos/hero_video.mp4" type="video/mp4">
     <source src="assets/videos/herovideo.mp4" type="video/mp4">
@@ -2403,19 +2624,53 @@ footer { background: #020d1c; color: #fff; }
 </div>
 
 <script>
-/* ── Video autoplay fix ── */
-document.addEventListener('DOMContentLoaded', function() {
-  var vid = document.getElementById('hero-vid');
-  if (vid) {
+/* ── Bulletproof Video Autoplay Fix ──
+   Handles: iOS Safari, Chrome autoplay policy, network delays, all edge cases */
+(function() {
+  function forcePlay(vid) {
+    if (!vid) return;
     vid.muted = true;
-    var p = vid.play();
-    if (p !== undefined) {
-      p.catch(function() {
-        vid.setAttribute('playsinline', '');
-        vid.load();
-        vid.play().catch(function(){});
-      });
+    vid.volume = 0;
+    vid.setAttribute('muted', '');
+    vid.setAttribute('playsinline', '');
+
+    function tryPlay() {
+      var p = vid.play();
+      if (p && typeof p.then === 'function') {
+        p.then(function() {
+          /* Playing — opacity already set via CSS */
+        }).catch(function() {
+          /* Autoplay blocked — try again on first user interaction */
+          var unlock = function() {
+            vid.play().catch(function(){});
+            document.removeEventListener('touchstart', unlock);
+            document.removeEventListener('click', unlock);
+            document.removeEventListener('keydown', unlock);
+          };
+          document.addEventListener('touchstart', unlock, { once: true });
+          document.addEventListener('click', unlock, { once: true });
+          document.addEventListener('keydown', unlock, { once: true });
+        });
+      }
     }
+
+    /* Try immediately */
+    tryPlay();
+
+    /* Also retry on canplay event in case buffering is slow */
+    vid.addEventListener('canplay', function() { tryPlay(); }, { once: true });
+
+    /* iOS: reload can help if video stalls before playing */
+    if (vid.readyState === 0) { vid.load(); }
+  }
+
+  /* Run as soon as DOM is available */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      forcePlay(document.getElementById('hero-vid'));
+    });
+  } else {
+    forcePlay(document.getElementById('hero-vid'));
   }
 
   /* ── Flyer reveal after 14s (polite, not intrusive) ── */
@@ -2423,7 +2678,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var fl = document.getElementById('vd-flyer');
     if (fl) { fl.style.display = 'block'; setTimeout(function(){ fl.classList.add('show'); }, 50); }
   }, 14000);
-});
+})();
 </script>
 
 
@@ -2592,11 +2847,21 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
         <div class="ptners" style="align-items:center">
-          <a href="https://www.copart.com" target="_blank" class="pt pt-copart" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;padding:8px 14px">
-            <img src="assets/images/Copart_logo.svg.png" alt="Copart" width="80" height="20" loading="lazy" decoding="async" style="height:20px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
+          <a href="https://www.copart.com" target="_blank" class="pt pt-copart"
+             style="display:inline-flex;align-items:center;justify-content:center;
+                    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+                    border-radius:10px;padding:10px 20px;text-decoration:none;min-width:120px">
+            <img src="assets/images/Copart_logo.svg.png" alt="Copart"
+                 style="height:26px;width:auto;max-width:100px;object-fit:contain;
+                        filter:brightness(0) invert(1);display:block;opacity:.9">
           </a>
-          <a href="https://www.iaai.com" target="_blank" class="pt pt-iaai" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;padding:8px 14px">
-            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA" width="80" height="20" loading="lazy" decoding="async" style="height:20px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
+          <a href="https://www.iaai.com" target="_blank" class="pt pt-iaai"
+             style="display:inline-flex;align-items:center;justify-content:center;
+                    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+                    border-radius:10px;padding:10px 20px;text-decoration:none;min-width:120px">
+            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA"
+                 style="height:22px;width:auto;max-width:100px;object-fit:contain;
+                        filter:brightness(0) invert(1);display:block;opacity:.9">
           </a>
           <span style="font-size:12px;color:rgba(255,255,255,.35);font-weight:500">Official Licensed Partners</span>
         </div>
@@ -2650,11 +2915,27 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- FIX 3: CTA buttons removed; official partner logos displayed instead -->
         <div style="margin-top:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
           <span style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35)">Official Licensed Partners</span>
-          <a href="https://www.copart.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:10px 16px;transition:background .25s" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
-            <img src="assets/images/Copart_logo.svg.png" alt="Copart — Official Partner" width="90" height="22" loading="lazy" decoding="async" style="height:22px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
+          <a href="https://www.copart.com" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;justify-content:center;
+                    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+                    border-radius:10px;padding:12px 24px;transition:all .3s;min-width:130px"
+             onmouseover="this.style.background='rgba(255,255,255,.16)';this.style.borderColor='rgba(255,255,255,.35)'"
+             onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.borderColor='rgba(255,255,255,.18)'">
+            <img src="assets/images/Copart_logo.svg.png"
+                 alt="Copart — Official Auction Partner"
+                 style="height:30px;width:auto;max-width:110px;object-fit:contain;
+                        filter:brightness(0) invert(1);display:block;opacity:.9">
           </a>
-          <a href="https://www.iaai.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:10px 16px;transition:background .25s" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
-            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAAI — Official Partner" width="80" height="22" loading="lazy" decoding="async" style="height:22px;width:auto;object-fit:contain;filter:brightness(0) invert(1);display:block">
+          <a href="https://www.iaai.com" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;justify-content:center;
+                    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+                    border-radius:10px;padding:12px 24px;transition:all .3s;min-width:130px"
+             onmouseover="this.style.background='rgba(255,255,255,.16)';this.style.borderColor='rgba(255,255,255,.35)'"
+             onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.borderColor='rgba(255,255,255,.18)'">
+            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png"
+                 alt="IAA — Official Auction Partner"
+                 style="height:28px;width:auto;max-width:110px;object-fit:contain;
+                        filter:brightness(0) invert(1);display:block;opacity:.9">
           </a>
         </div>
       </div>
@@ -2736,7 +3017,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <a href="https://www.instagram.com/vicdavisautolink_copart/" target="_blank" class="ig-follow-btn">Follow</a>
   </div>
 
-  <!-- 4×3 Grid -->
+  <!-- 3×2 Grid — 6 unique images, fastest load -->
   <div class="ig-grid">
     <!-- Row 1 -->
     <div class="ig-item fu">
@@ -2754,75 +3035,32 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </div>
     <div class="ig-item fu fd2">
-      <img src="assets/images/pexels-siddant-kanthi-1648343429-29827767.jpg" alt="Shipping" loading="lazy" decoding="async">
-      <div class="ig-item-overlay">
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>2.1K</div>
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>92</div>
-      </div>
-    </div>
-    <div class="ig-item fu fd3">
-      <img src="assets/images/pexels-pixabay-164634.jpg" alt="Luxury Cars" loading="lazy" decoding="async">
-      <div class="ig-item-overlay">
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.8K</div>
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>65</div>
-      </div>
-    </div>
-    <!-- Row 2 -->
-    <div class="ig-item fu">
-      <img src="assets/images/gallery4.jpg" alt="VicDavis Cars" loading="lazy" decoding="async">
-      <div class="ig-item-overlay">
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>956</div>
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>27</div>
-      </div>
-    </div>
-    <div class="ig-item fu fd1">
-      <img src="assets/images/shippedtoyourdoor.jpg" alt="Delivered" loading="lazy" decoding="async">
-      <div class="ig-item-overlay">
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.4K</div>
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>53</div>
-      </div>
-    </div>
-    <div class="ig-item fu fd2">
-      <img src="assets/images/usabidding.jpg" alt="USA Auction" loading="lazy" decoding="async">
+      <img src="assets/images/usabidding.jpg" alt="USA Auction Live Bidding" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>3.2K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>118</div>
       </div>
     </div>
-    <div class="ig-item fu fd3">
-      <img src="assets/images/loogistics.jpg" alt="Logistics" loading="lazy" decoding="async">
+    <!-- Row 2 -->
+    <div class="ig-item fu fd1">
+      <img src="assets/images/loogistics.jpg" alt="Shipping & Logistics" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>2.7K</div>
         <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>84</div>
       </div>
     </div>
-    <!-- Row 3 -->
-    <div class="ig-item fu">
-      <img src="assets/images/gallery1.jpg" alt="Fleet" loading="lazy" style="object-position:center 30%" decoding="async">
-      <div class="ig-item-overlay">
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>998</div>
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>42</div>
-      </div>
-    </div>
-    <div class="ig-item fu fd1">
-      <img src="assets/images/gallery2.jpg" alt="Cars" loading="lazy" style="object-position:center 70%" decoding="async">
-      <div class="ig-item-overlay">
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.1K</div>
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>36</div>
-      </div>
-    </div>
     <div class="ig-item fu fd2">
-      <img src="assets/images/pexels-siddant-kanthi-1648343429-29827767.jpg" alt="Import" loading="lazy" style="object-position:right center" decoding="async">
+      <img src="assets/images/shippedtoyourdoor.jpg" alt="Delivered to Your Door" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.6K</div>
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>71</div>
+        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>1.4K</div>
+        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>53</div>
       </div>
     </div>
     <div class="ig-item fu fd3">
-      <img src="assets/images/gallery4.jpg" alt="VicDavis" loading="lazy" style="object-position:left center" decoding="async">
+      <img src="assets/images/gallery4.jpg" alt="VicDavis Cars" loading="lazy" decoding="async">
       <div class="ig-item-overlay">
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>745</div>
-        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>19</div>
+        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>956</div>
+        <div class="ig-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>27</div>
       </div>
     </div>
   </div>
