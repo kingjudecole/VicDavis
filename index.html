@@ -833,7 +833,7 @@ ul { list-style: none; }
 .icard-icon svg { width: 22px; height: 22px; fill: var(--red); }
 .icard h4 { font-family: var(--fh); font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 5px; letter-spacing: .3px; }
 .icard p { font-size: 11px; color: rgba(255,255,255,.42); line-height: 1.5; }
-.ptners { display: flex; gap: 12px; margin-top: 28px; align-items: center; flex-wrap: wrap; }
+.ptners { display: flex; gap: 14px; margin-top: 32px; align-items: center; flex-wrap: wrap; }
 .pt {
   font-family: var(--fh);
   font-size: 14px; font-weight: 700;
@@ -844,6 +844,38 @@ ul { list-style: none; }
 }
 .pt-copart { background: #0066CC; }
 .pt-iaai { background: #C41E3A; }
+
+/* Partner logo badges — natural colors, no filter distortion */
+.pbadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.pbadge img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: 36px;
+  max-width: 130px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+/* Copart: black bg logo blends into dark section */
+.pbadge-copart {
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.14);
+  overflow: hidden;
+}
+/* IAA: red bg logo — white pill so brand colors read correctly */
+.pbadge-iaai {
+  background: #fff;
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 8px 14px;
+}
 
 /* ============================
    SERVICES
@@ -2882,22 +2914,12 @@ footer { background: #020d1c; color: #fff; }
             <div class="stxt"><h4>Delivered in Ghana</h4><p>Your vehicle arrives at Dansoman or we can arrange delivery across Ghana.</p></div>
           </div>
         </div>
-        <div class="ptners" style="align-items:center">
-          <div style="display:flex;align-items:center;justify-content:center;
-                      padding:10px 20px;border-radius:8px;
-                      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-                      min-width:120px">
-            <img src="assets/images/Copart_logo.svg.png" alt="Copart"
-                 style="max-width:120px;height:auto;object-fit:contain;
-                        filter:brightness(0) invert(1);display:block;opacity:.9">
+        <div class="ptners">
+          <div class="pbadge pbadge-copart">
+            <img src="assets/images/Copart_logo.svg.png" alt="Copart — Official Auction Partner">
           </div>
-          <div style="display:flex;align-items:center;justify-content:center;
-                      padding:10px 20px;border-radius:8px;
-                      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-                      min-width:120px">
-            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA"
-                 style="max-width:120px;height:auto;object-fit:contain;
-                        filter:brightness(0) invert(1);display:block;opacity:.9">
+          <div class="pbadge pbadge-iaai">
+            <img src="assets/images/iaa-insurance-auto-auctions-logo-png_seeklogo-368159.png" alt="IAA — Official Auction Partner">
           </div>
         </div>
       </div>
